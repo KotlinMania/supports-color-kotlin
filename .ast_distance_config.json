@@ -1,0 +1,22 @@
+{
+  "type": "port",
+  "name": "supports-color-kotlin",
+  "source": {
+    "path": "tmp/supports-color/src",
+    "lang": "rust"
+  },
+  "target": {
+    "path": "src/commonMain/kotlin/io/github/kotlinmania/supportscolor",
+    "lang": "kotlin"
+  },
+  "checks": {
+    "deep": true,
+    "missing": true,
+    "todos": true,
+    "lint": true
+  },
+  "reexport_modules": [
+    "mod.rs",
+    "lib.rs"
+  ]
+}
