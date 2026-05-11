@@ -50,7 +50,7 @@ if let Some(support) = supports_color::on(Stream::Stdout) {
 
 ```kotlin
 dependencies {
-    implementation("io.github.kotlinmania:supports-color-kotlin:0.1.0-SNAPSHOT")
+    implementation("io.github.kotlinmania:supports-color-kotlin:0.1.0")
 }
 ```
 
