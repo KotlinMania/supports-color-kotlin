@@ -5,22 +5,22 @@ package io.github.kotlinmania.supportscolor
  * Detects whether a terminal supports color, and gives details about that
  * support. It takes into account the `NO_COLOR` environment variable.
  *
- * This module is a Kotlin Multiplatform port of [@sindresorhus](https://github.com/sindresorhus)'
- * [NPM package by the same name](https://npm.im/supports-color), via the Rust
- * `supports-color` crate.
+ * This crate is a Kotlin port of [@sindresorhus](https://github.com/sindresorhus)'
+ * [NPM package by the same name](https://npm.im/supports-color).
  *
  * ## Example
  *
  * ```kotlin
  * import io.github.kotlinmania.supportscolor.Stream
- * import io.github.kotlinmania.supportscolor.on
  *
  * val support = on(Stream.Stdout)
  * if (support != null) {
- *     when {
- *         support.has16m -> println("16 million (RGB) colors are supported")
- *         support.has256 -> println("256-bit colors are supported.")
- *         support.hasBasic -> println("Only basic ANSI colors are supported.")
+ *     if (support.has16m) {
+ *         println("16 million (RGB) colors are supported")
+ *     } else if (support.has256) {
+ *         println("256-bit colors are supported.")
+ *     } else if (support.hasBasic) {
+ *         println("Only basic ANSI colors are supported.")
  *     }
  * } else {
  *     println("No color support.")
@@ -28,17 +28,7 @@ package io.github.kotlinmania.supportscolor
  * ```
  */
 
-// Kotlin equivalents of the upstream environment-variable and once-lock standard library
-// imports. [envVar] is the success arm of the upstream environment-variable read; null is
-// both the not-present and the invalid-unicode arms folded together, matching how the
-// upstream consumes them. [envSetVar], [envRemoveVar], and [envVars] mirror the upstream
-// environment-variable mutators and the iterator used by the test block at the bottom of
-// this file. The upstream once-lock becomes [kotlin.Lazy] at the usage site; see [cache]
-// below.
 internal expect fun envVar(name: String): String?
-internal expect fun envSetVar(name: String, value: String)
-internal expect fun envRemoveVar(name: String)
-internal expect fun envVars(): Iterable<Pair<String, String>>
 
 /** possible stream sources */
 enum class Stream {
@@ -75,8 +65,7 @@ private fun envNoColor(): Boolean {
     }
 }
 
-// same as a nullable-string identity passthrough — see the upstream deref-string helper.
-// Kept as a function so the call sites read the same as the upstream originals.
+// identity on a nullable string
 private fun asStr(option: String?): String? = option
 
 private fun translateLevel(level: Int): ColorLevel? {
@@ -139,9 +128,7 @@ private fun check256Color(term: String): Boolean =
  */
 fun on(stream: Stream): ColorLevel? = translateLevel(supportsColor(stream))
 
-// Compile-time assertion that the below indexing will never panic:
-// the `Stream` enum has exactly two ordinals (0, 1), and `cache` is sized to match,
-// so `cache[stream.ordinal]` is in-bounds by construction.
+// Compile-time assertion that the below indexing will never panic
 private val cache: Array<Lazy<ColorLevel?>> = arrayOf(
     lazy { translateLevel(supportsColor(Stream.Stdout)) },
     lazy { translateLevel(supportsColor(Stream.Stderr)) },

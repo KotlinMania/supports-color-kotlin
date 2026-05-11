@@ -85,6 +85,12 @@ kotlin {
         val posixMain by creating { dependsOn(commonMain) }
         appleMain.get().dependsOn(posixMain)
         linuxMain.get().dependsOn(posixMain)
+
+        // POSIX shared test source set: appleTest + linuxTest both reach for
+        // platform.posix.setenv / unsetenv when porting the upstream test mod.
+        val posixTest by creating { dependsOn(commonTest) }
+        appleTest.get().dependsOn(posixTest)
+        linuxTest.get().dependsOn(posixTest)
     }
     jvmToolchain(21)
 }

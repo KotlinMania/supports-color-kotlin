@@ -1,24 +1,18 @@
-// port-lint: source lib.rs (the test block at the bottom)
+// port-lint: source lib.rs
+@file:OptIn(ExperimentalForeignApi::class)
+
 package io.github.kotlinmania.supportscolor
 
+import kotlinx.cinterop.ExperimentalForeignApi
+import platform.posix._putenv_s
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 
-// The upstream uses a process-wide mutex to serialize the env-mutating tests below. Kotlin
-// test runners execute the tests inside a single class sequentially per worker on every
-// target this repo ships for, which is the strongest portable guarantee available; no
-// extra KMP-portable mutex is wired up.
-
 private fun setUp() {
-    // clears process env variables
-    envVars().forEach { (k, _) -> envRemoveVar(k) }
-    // Kotlin Native cinterop does not surface the underlying environment-block pointer, so
-    // the iterator-driven line above only fires on the JS Node target. To honor the
-    // upstream clean-env precondition on every target, additionally remove every name
-    // [supportsColor] and [IsCi] consult.
-    for (name in TEST_ENV_NAMES) envRemoveVar(name)
+    // clears process env variable
+    for (name in KNOWN_ENV) _putenv_s(name, "")
 }
 
 class LibTest {
@@ -33,8 +27,8 @@ class LibTest {
     fun testClicolorAnsi() {
         setUp()
 
-        envSetVar("IGNORE_IS_TERMINAL", "1")
-        envSetVar("CLICOLOR", "1")
+        _putenv_s("IGNORE_IS_TERMINAL", "1")
+        _putenv_s("CLICOLOR", "1")
         val expected = ColorLevel(
             level = 1,
             hasBasic = true,
@@ -43,20 +37,20 @@ class LibTest {
         )
         assertEquals(expected, on(Stream.Stdout))
 
-        envSetVar("CLICOLOR", "0")
+        _putenv_s("CLICOLOR", "0")
         assertNull(on(Stream.Stdout))
     }
 
     @Test
     fun testOnCached() {
         setUp()
-        envSetVar("IGNORE_IS_TERMINAL", "1")
+        _putenv_s("IGNORE_IS_TERMINAL", "1")
 
-        envSetVar("CLICOLOR", "1")
+        _putenv_s("CLICOLOR", "1")
         assertNotNull(on(Stream.Stdout))
         assertNotNull(onCached(Stream.Stdout))
 
-        envSetVar("CLICOLOR", "0")
+        _putenv_s("CLICOLOR", "0")
         assertNull(on(Stream.Stdout))
         assertNotNull(onCached(Stream.Stdout))
     }
@@ -65,8 +59,8 @@ class LibTest {
     fun testClicolorForceAnsi() {
         setUp()
 
-        envSetVar("CLICOLOR", "0")
-        envSetVar("CLICOLOR_FORCE", "1")
+        _putenv_s("CLICOLOR", "0")
+        _putenv_s("CLICOLOR_FORCE", "1")
         val expected = ColorLevel(
             level = 1,
             hasBasic = true,
@@ -77,10 +71,7 @@ class LibTest {
     }
 }
 
-// Names of every environment variable [supportsColor] and the in-repo [IsCi] stand-in
-// consult. Used only by [setUp] to guarantee a clean precondition; see the note there.
-private val TEST_ENV_NAMES: Array<String> = arrayOf(
-    // supportsColor
+private val KNOWN_ENV: Array<String> = arrayOf(
     "FORCE_COLOR",
     "CLICOLOR_FORCE",
     "NO_COLOR",
@@ -89,7 +80,6 @@ private val TEST_ENV_NAMES: Array<String> = arrayOf(
     "COLORTERM",
     "CLICOLOR",
     "IGNORE_IS_TERMINAL",
-    // IsCi
     "CI",
     "CONTINUOUS_INTEGRATION",
     "BUILD_NUMBER",

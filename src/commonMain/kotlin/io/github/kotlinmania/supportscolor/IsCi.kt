@@ -1,16 +1,6 @@
-// port-lint: ignore (in-repo stand-in for the upstream is-ci 1.2.0 crate until a sibling
-// is-ci-kotlin port exists; mirrors the upstream uncached surface so the call site in
-// [Lib.kt] reads identically to the upstream original.)
+// port-lint: ignore
 package io.github.kotlinmania.supportscolor
 
-/**
- * Mirrors the upstream is-ci 1.2.0 crate. That crate exposes a single public function,
- * [uncached], which returns true when any of a known set of continuous-integration provider
- * environment variables is set in the current process.
- *
- * This Kotlin object preserves that call shape ([IsCi.uncached]) so the consumer line in
- * [supportsColor] reads the same as the upstream original.
- */
 internal object IsCi {
     fun uncached(): Boolean {
         for (name in CI_ENV_NAMES) {
