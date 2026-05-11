@@ -1,4 +1,4 @@
-// port-lint: source src/lib.rs
+// port-lint: source lib.rs
 package io.github.kotlinmania.supportscolor
 
 /**
@@ -46,7 +46,7 @@ enum class Stream {
     Stderr,
 }
 
-internal fun envForceColor(): Int {
+private fun envForceColor(): Int {
     val force = envVar("FORCE_COLOR")
     return if (force != null) {
         when (force) {
@@ -68,7 +68,7 @@ internal fun envForceColor(): Int {
     }
 }
 
-internal fun envNoColor(): Boolean {
+private fun envNoColor(): Boolean {
     return when (asStr(envVar("NO_COLOR"))) {
         "0", null -> false
         else -> true
@@ -77,9 +77,9 @@ internal fun envNoColor(): Boolean {
 
 // same as a nullable-string identity passthrough — see the upstream deref-string helper.
 // Kept as a function so the call sites read the same as the upstream originals.
-internal fun asStr(option: String?): String? = option
+private fun asStr(option: String?): String? = option
 
-internal fun translateLevel(level: Int): ColorLevel? {
+private fun translateLevel(level: Int): ColorLevel? {
     return if (level == 0) {
         null
     } else {
@@ -94,7 +94,7 @@ internal fun translateLevel(level: Int): ColorLevel? {
 
 internal expect fun isATty(stream: Stream): Boolean
 
-internal fun supportsColor(stream: Stream): Int {
+private fun supportsColor(stream: Stream): Int {
     val forceColor = envForceColor()
     return if (forceColor > 0) {
         forceColor
@@ -125,24 +125,19 @@ internal fun supportsColor(stream: Stream): Int {
 
 internal expect fun checkAnsiColor(term: String?): Boolean
 
-internal fun checkColorterm16m(colorterm: String): Boolean {
-    return colorterm == "truecolor" || colorterm == "24bit"
-}
+private fun checkColorterm16m(colorterm: String): Boolean =
+    colorterm == "truecolor" || colorterm == "24bit"
 
-internal fun checkTerm16m(term: String): Boolean {
-    return term.endsWith("direct") || term.endsWith("truecolor")
-}
+private fun checkTerm16m(term: String): Boolean =
+    term.endsWith("direct") || term.endsWith("truecolor")
 
-internal fun check256Color(term: String): Boolean {
-    return term.endsWith("256") || term.endsWith("256color")
-}
+private fun check256Color(term: String): Boolean =
+    term.endsWith("256") || term.endsWith("256color")
 
 /**
  * Returns a [ColorLevel] if a [Stream] supports terminal colors.
  */
-fun on(stream: Stream): ColorLevel? {
-    return translateLevel(supportsColor(stream))
-}
+fun on(stream: Stream): ColorLevel? = translateLevel(supportsColor(stream))
 
 // Compile-time assertion that the below indexing will never panic:
 // the `Stream` enum has exactly two ordinals (0, 1), and `cache` is sized to match,

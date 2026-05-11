@@ -1,4 +1,4 @@
-// port-lint: source src/lib.rs (the test block at the bottom)
+// port-lint: source lib.rs (the test block at the bottom)
 package io.github.kotlinmania.supportscolor
 
 import kotlin.test.Test
