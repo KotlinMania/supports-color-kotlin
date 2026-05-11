@@ -4,6 +4,7 @@
 package io.github.kotlinmania.supportscolor
 
 import kotlinx.cinterop.ExperimentalForeignApi
+import platform.posix._putenv
 import platform.posix._putenv_s
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -12,7 +13,7 @@ import kotlin.test.assertNull
 
 private fun setUp() {
     // clears process env variable
-    for (name in KNOWN_ENV) _putenv_s(name, "")
+    for (name in KNOWN_ENV) _putenv("$name=")
 }
 
 class OnTest {
