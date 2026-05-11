@@ -14,6 +14,7 @@ import platform.windows.DWORDVar
 import platform.windows.GetConsoleMode
 import platform.windows.GetStdHandle
 import platform.windows.INVALID_HANDLE_VALUE
+import platform.windows.SetEnvironmentVariableA
 import platform.windows.STD_ERROR_HANDLE
 import platform.windows.STD_OUTPUT_HANDLE
 
@@ -39,7 +40,6 @@ internal actual fun setEnvVar(name: String, value: String) {
 }
 
 internal actual fun clearAllEnvVars() {
-    // _putenv_s with an empty value removes the variable on Windows / MSVCRT semantics.
-    for (name in SUPPORTS_COLOR_ENV_NAMES) _putenv_s(name, "")
-    for (name in CI_ENV_NAMES) _putenv_s(name, "")
+    for (name in SUPPORTS_COLOR_ENV_NAMES) SetEnvironmentVariableA(name, null)
+    for (name in CI_ENV_NAMES) SetEnvironmentVariableA(name, null)
 }
