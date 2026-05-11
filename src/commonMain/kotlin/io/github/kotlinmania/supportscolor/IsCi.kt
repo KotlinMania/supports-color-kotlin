@@ -1,23 +1,26 @@
-// port-lint: ignore (vendored Kotlin equivalent of the `is_ci 1.2.0` crate dependency until a sibling is-ci-kotlin port exists)
+// port-lint: ignore (in-repo stand-in for the upstream is-ci 1.2.0 crate until a sibling
+// is-ci-kotlin port exists; mirrors the upstream uncached surface so the call site in
+// [Lib.kt] reads identically to the upstream original.)
 package io.github.kotlinmania.supportscolor
 
 /**
- * Mirrors `is_ci::uncached()` from the upstream `is_ci` crate (version 1.2.0). Returns true when
- * the current process appears to be running inside a continuous-integration environment by looking
- * for any of the well-known CI provider environment variables.
+ * Mirrors the upstream is-ci 1.2.0 crate. That crate exposes a single public function,
+ * [uncached], which returns true when any of a known set of continuous-integration provider
+ * environment variables is set in the current process.
  *
- * The list mirrors the upstream crate's recognised provider set and is consulted by
- * [supportsColor] as a fallback signal: if the stream is not a tty and no other color signal is
- * present, presence of a CI environment is treated as evidence that ANSI color is acceptable.
+ * This Kotlin object preserves that call shape ([IsCi.uncached]) so the consumer line in
+ * [supportsColor] reads the same as the upstream original.
  */
-internal fun isCiUncached(): Boolean {
-    for (name in CI_ENV_NAMES) {
-        if (envVar(name) != null) return true
+internal object IsCi {
+    fun uncached(): Boolean {
+        for (name in CI_ENV_NAMES) {
+            if (envVar(name) != null) return true
+        }
+        return false
     }
-    return false
 }
 
-internal val CI_ENV_NAMES: Array<String> = arrayOf(
+private val CI_ENV_NAMES: Array<String> = arrayOf(
     "CI",
     "CONTINUOUS_INTEGRATION",
     "BUILD_NUMBER",

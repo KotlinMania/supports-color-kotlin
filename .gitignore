@@ -20,6 +20,7 @@ tmp/
 
 # AST distance reports and binaries
 port_status_report.md
+port_lint_proposed_changes.md
 high_priority_ports.md
 ast_distance_*.txt
 .cache/

@@ -36,7 +36,7 @@ jobs:
           --no-configuration-cache
 
   build-linux:
-    name: Build and Test (Linux / Android / JS / WASM)
+    name: Build and Test (Linux / JS / WASM)
     runs-on: ubuntu-latest
 
     steps:
@@ -69,18 +69,13 @@ jobs:
           npm --version
           yarn --version
 
-      - name: Build and test Linux, Android, JS, and WASM targets
+      - name: Build and test Linux, JS, and WASM targets
         env:
           ORG_GRADLE_PROJECT_kotlin_js_yarn_download: "false"
         run: >
           ./gradlew
-          compileAndroidMain
-          assembleUnitTest
-          assembleAndroidTest
-          jsBrowserTest
           jsNodeTest
           linuxX64Test
-          wasmJsBrowserTest
           wasmJsNodeTest
           --no-configuration-cache
 

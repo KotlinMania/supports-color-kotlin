@@ -1,4 +1,4 @@
-// port-lint: ignore (Node.js implementation of env / isatty / cfg(windows) shims for src/lib.rs)
+// port-lint: source src/lib.rs
 package io.github.kotlinmania.supportscolor
 
 internal actual fun envVar(name: String): String? {
@@ -6,23 +6,42 @@ internal actual fun envVar(name: String): String? {
     return if (raw == null || raw == undefined()) null else raw.unsafeCast<String>()
 }
 
-internal actual fun isATty(stream: Stream): Boolean = when (stream) {
-    Stream.STDOUT -> jsIsTty("stdout")
-    Stream.STDERR -> jsIsTty("stderr")
-}
-
-internal actual val isWindows: Boolean = jsIsWindows()
-
-internal actual fun setEnvVar(name: String, value: String) {
+internal actual fun envSetVar(name: String, value: String) {
     jsSetEnv(name, value)
 }
 
-internal actual fun clearAllEnvVars() {
+internal actual fun envRemoveVar(name: String) {
+    jsDeleteEnv(name)
+}
+
+internal actual fun envVars(): Iterable<Pair<String, String>> {
+    val result = mutableListOf<Pair<String, String>>()
     val names = jsEnvKeys()
     val length = names.length
     for (i in 0 until length) {
         val key = names[i].unsafeCast<String>()
-        jsDeleteEnv(key)
+        val value = jsGetEnv(key)
+        if (value != null && value != undefined()) {
+            result.add(key to value.unsafeCast<String>())
+        }
+    }
+    return result
+}
+
+internal actual fun isATty(stream: Stream): Boolean = when (stream) {
+    Stream.Stdout -> jsIsTty("stdout")
+    Stream.Stderr -> jsIsTty("stderr")
+}
+
+// JS hosts (Node, browsers) are not Windows. Use the non-Windows variant of the upstream
+// cfg-gated `checkAnsiColor`.
+internal actual fun checkAnsiColor(term: String?): Boolean {
+    return if (term != null) {
+        // dumb terminals don't support ANSI escape sequences.
+        term != "dumb"
+    } else {
+        // TERM is not set, which is really weird on Unix systems.
+        false
     }
 }
 
@@ -44,10 +63,6 @@ private fun jsEnvKeys(): dynamic = js(
 
 private fun jsIsTty(name: String): Boolean = js(
     "(typeof process !== 'undefined' && process && process[name] && process[name].isTTY === true)",
-)
-
-private fun jsIsWindows(): Boolean = js(
-    "(typeof process !== 'undefined' && process && process.platform === 'win32')",
 )
 
 private fun undefined(): dynamic = js("undefined")
