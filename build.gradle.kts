@@ -10,24 +10,11 @@ import org.jetbrains.kotlin.gradle.targets.wasm.yarn.WasmYarnRootEnvSpec
 plugins {
     kotlin("multiplatform") version "2.3.21"
     kotlin("plugin.serialization") version "2.3.21"
-    id("com.android.kotlin.multiplatform.library") version "9.2.0"
     id("com.vanniktech.maven.publish") version "0.36.0"
 }
 
 group = "io.github.kotlinmania"
 version = "0.1.0"
-
-val androidSdkDir: String? =
-    providers.environmentVariable("ANDROID_SDK_ROOT").orNull
-        ?: providers.environmentVariable("ANDROID_HOME").orNull
-
-if (androidSdkDir != null && file(androidSdkDir).exists()) {
-    val localProperties = rootProject.file("local.properties")
-    if (!localProperties.exists()) {
-        val sdkDirPropertyValue = file(androidSdkDir).absolutePath.replace("\\", "/")
-        localProperties.writeText("sdk.dir=$sdkDirPropertyValue")
-    }
-}
 
 kotlin {
     applyDefaultHierarchyTemplate()
@@ -79,16 +66,6 @@ kotlin {
         flattenPackage = "io.github.kotlinmania.supportscolor"
     }
 
-    android {
-        namespace = "io.github.kotlinmania.supportscolor"
-        compileSdk = 34
-        minSdk = 24
-        withHostTestBuilder {}.configure {}
-        withDeviceTestBuilder {
-            sourceSetTreeName = "test"
-        }
-    }
-
     sourceSets {
         val commonMain by getting {
             dependencies {
@@ -101,6 +78,19 @@ kotlin {
         }
 
         val commonTest by getting { dependencies { implementation(kotlin("test")) } }
+
+        // POSIX shared source set: covers everything `cfg(not(windows))` covers on Rust's side.
+        // Created so the upstream `#[cfg(not(windows))] fn check_ansi_color(...)` arm has one
+        // Kotlin home shared by apple/linux/ios; mingw provides the `#[cfg(windows)]` arm.
+        val posixMain by creating { dependsOn(commonMain) }
+        appleMain.get().dependsOn(posixMain)
+        linuxMain.get().dependsOn(posixMain)
+
+        // POSIX shared test source set: appleTest + linuxTest both reach for
+        // platform.posix.setenv / unsetenv when porting the upstream test mod.
+        val posixTest by creating { dependsOn(commonTest) }
+        appleTest.get().dependsOn(posixTest)
+        linuxTest.get().dependsOn(posixTest)
     }
     jvmToolchain(21)
 }
