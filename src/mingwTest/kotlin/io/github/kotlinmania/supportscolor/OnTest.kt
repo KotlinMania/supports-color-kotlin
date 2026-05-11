@@ -4,8 +4,7 @@
 package io.github.kotlinmania.supportscolor
 
 import kotlinx.cinterop.ExperimentalForeignApi
-import platform.posix.setenv
-import platform.posix.unsetenv
+import platform.posix._putenv_s
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
@@ -13,10 +12,10 @@ import kotlin.test.assertNull
 
 private fun setUp() {
     // clears process env variable
-    for (name in KNOWN_ENV) unsetenv(name)
+    for (name in KNOWN_ENV) _putenv_s(name, "")
 }
 
-class LibTest {
+class OnTest {
     @Test
     fun testEmptyEnv() {
         setUp()
@@ -28,8 +27,8 @@ class LibTest {
     fun testClicolorAnsi() {
         setUp()
 
-        setenv("IGNORE_IS_TERMINAL", "1", 1)
-        setenv("CLICOLOR", "1", 1)
+        _putenv_s("IGNORE_IS_TERMINAL", "1")
+        _putenv_s("CLICOLOR", "1")
         val expected = ColorLevel(
             level = 1,
             hasBasic = true,
@@ -38,20 +37,20 @@ class LibTest {
         )
         assertEquals(expected, on(Stream.Stdout))
 
-        setenv("CLICOLOR", "0", 1)
+        _putenv_s("CLICOLOR", "0")
         assertNull(on(Stream.Stdout))
     }
 
     @Test
     fun testOnCached() {
         setUp()
-        setenv("IGNORE_IS_TERMINAL", "1", 1)
+        _putenv_s("IGNORE_IS_TERMINAL", "1")
 
-        setenv("CLICOLOR", "1", 1)
+        _putenv_s("CLICOLOR", "1")
         assertNotNull(on(Stream.Stdout))
         assertNotNull(onCached(Stream.Stdout))
 
-        setenv("CLICOLOR", "0", 1)
+        _putenv_s("CLICOLOR", "0")
         assertNull(on(Stream.Stdout))
         assertNotNull(onCached(Stream.Stdout))
     }
@@ -60,8 +59,8 @@ class LibTest {
     fun testClicolorForceAnsi() {
         setUp()
 
-        setenv("CLICOLOR", "0", 1)
-        setenv("CLICOLOR_FORCE", "1", 1)
+        _putenv_s("CLICOLOR", "0")
+        _putenv_s("CLICOLOR_FORCE", "1")
         val expected = ColorLevel(
             level = 1,
             hasBasic = true,

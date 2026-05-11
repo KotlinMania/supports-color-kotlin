@@ -1,6 +1,4 @@
 // port-lint: source lib.rs
-@file:OptIn(kotlin.js.ExperimentalWasmJsInterop::class)
-
 package io.github.kotlinmania.supportscolor
 
 import kotlin.test.Test
@@ -10,14 +8,14 @@ import kotlin.test.assertNull
 
 private fun setUp() {
     // clears process env variable
-    val n = jsEnvCount()
-    repeat(n) {
-        val key = jsEnvKeyAt(0) ?: return
-        jsDeleteEnv(key)
+    val keys = jsEnvKeys()
+    val length = keys.length
+    for (i in 0 until length) {
+        jsDeleteEnv(keys[i].unsafeCast<String>())
     }
 }
 
-class LibTest {
+class OnTest {
     @Test
     fun testEmptyEnv() {
         setUp()
@@ -73,18 +71,14 @@ class LibTest {
     }
 }
 
-private fun jsSetEnv(name: String, value: String) {
-    js("if (typeof process !== 'undefined' && process && process.env) { process.env[name] = value; }")
-}
-
-private fun jsDeleteEnv(name: String) {
-    js("if (typeof process !== 'undefined' && process && process.env) { delete process.env[name]; }")
-}
-
-private fun jsEnvCount(): Int = js(
-    "(typeof process !== 'undefined' && process && process.env) ? Object.keys(process.env).length : 0",
+private fun jsSetEnv(name: String, value: String): Unit = js(
+    "if (typeof process !== 'undefined' && process && process.env) { process.env[name] = value; }",
 )
 
-private fun jsEnvKeyAt(index: Int): String? = js(
-    "(typeof process !== 'undefined' && process && process.env) ? Object.keys(process.env)[index] : null",
+private fun jsDeleteEnv(name: String): Unit = js(
+    "if (typeof process !== 'undefined' && process && process.env) { delete process.env[name]; }",
+)
+
+private fun jsEnvKeys(): dynamic = js(
+    "(typeof process !== 'undefined' && process && process.env) ? Object.keys(process.env) : []",
 )
