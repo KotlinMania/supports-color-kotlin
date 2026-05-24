@@ -42,6 +42,7 @@ on:
     - cron: "0 7 * * 1"
   workflow_dispatch:
 
+  workflow_dispatch:
 permissions:
   contents: read
 
@@ -106,15 +107,9 @@ jobs:
       - name: Run manual build steps
         if: matrix.build-mode == 'manual'
         run: |
-          ./gradlew \
-            compileAndroidMain \
-            compileKotlinJs \
-            compileKotlinWasmJs \
-            --rerun-tasks \
-            --no-build-cache \
-            -Pkotlin.compiler.execution.strategy=out-of-process \
-            --no-configuration-cache \
-            --no-daemon
+          export JAVA_TOOL_OPTIONS="-javaagent:${CODEQL_EXTRACTOR_JAVA_ROOT}/tools/codeql-java-agent.jar=java,kotlin"
+          echo "JAVA_TOOL_OPTIONS=${JAVA_TOOL_OPTIONS}"
+          ./gradlew --no-daemon setupAndroidSdk codeqlCompileJvm --no-configuration-cache
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v4
