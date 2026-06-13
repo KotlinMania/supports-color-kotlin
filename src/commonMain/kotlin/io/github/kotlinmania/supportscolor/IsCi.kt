@@ -4,7 +4,8 @@ package io.github.kotlinmania.supportscolor
 internal object IsCi {
     fun uncached(): Boolean {
         for (name in CI_ENV_NAMES) {
-            if (envVar(name) != null) return true
+            val value = envVar(name)
+            if (value != null && value.isNotEmpty()) return true
         }
         return false
     }
