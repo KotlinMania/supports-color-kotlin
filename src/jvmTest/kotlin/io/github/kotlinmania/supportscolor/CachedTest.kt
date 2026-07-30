@@ -14,7 +14,6 @@ class CachedTest {
                         onCached(Stream.Stdout)
                     }
                 }
-            }
-            .forEach { thread -> thread.join() }
+            }.forEach { thread -> thread.join() }
     }
 }
