@@ -1,8 +1,8 @@
 // port-lint: source lib.rs
 package io.github.kotlinmania.supportscolor
 
-internal actual fun checkAnsiColor(term: String?): Boolean {
-    return if (term != null) {
+internal actual fun checkAnsiColor(term: String?): Boolean =
+    if (term != null) {
         // cygwin doesn't seem to support ANSI escape sequences and instead has its own variety.
         term != "dumb" && term != "cygwin"
     } else {
@@ -10,4 +10,3 @@ internal actual fun checkAnsiColor(term: String?): Boolean {
         // terminals support ANSI escape sequences (since Windows 10 version 1511).
         true
     }
-}

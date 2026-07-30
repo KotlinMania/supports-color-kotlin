@@ -15,10 +15,11 @@ import platform.windows.STD_ERROR_HANDLE
 import platform.windows.STD_OUTPUT_HANDLE
 
 internal actual fun isATty(stream: Stream): Boolean {
-    val stdHandle = when (stream) {
-        Stream.Stdout -> STD_OUTPUT_HANDLE
-        Stream.Stderr -> STD_ERROR_HANDLE
-    }
+    val stdHandle =
+        when (stream) {
+            Stream.Stdout -> STD_OUTPUT_HANDLE
+            Stream.Stderr -> STD_ERROR_HANDLE
+        }
     val handle = GetStdHandle(stdHandle)
     if (handle == INVALID_HANDLE_VALUE || handle == null) return false
     return memScoped {

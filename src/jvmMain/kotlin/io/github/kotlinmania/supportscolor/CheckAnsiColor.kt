@@ -4,8 +4,8 @@ package io.github.kotlinmania.supportscolor
 private val isWindowsRuntime: Boolean =
     System.getProperty("os.name").startsWith("Windows", ignoreCase = true)
 
-internal actual fun checkAnsiColor(term: String?): Boolean {
-    return if (term != null) {
+internal actual fun checkAnsiColor(term: String?): Boolean =
+    if (term != null) {
         if (isWindowsRuntime) {
             // cygwin doesn't seem to support ANSI escape sequences and instead has its own variety.
             term != "dumb" && term != "cygwin"
@@ -23,4 +23,3 @@ internal actual fun checkAnsiColor(term: String?): Boolean {
             false
         }
     }
-}

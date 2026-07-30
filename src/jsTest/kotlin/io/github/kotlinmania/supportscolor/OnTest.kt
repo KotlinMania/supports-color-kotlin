@@ -29,12 +29,13 @@ class OnTest {
 
         jsSetEnv("IGNORE_IS_TERMINAL", "1")
         jsSetEnv("CLICOLOR", "1")
-        val expected = ColorLevel(
-            level = 1,
-            hasBasic = true,
-            has256 = false,
-            has16m = false,
-        )
+        val expected =
+            ColorLevel(
+                level = 1,
+                hasBasic = true,
+                has256 = false,
+                has16m = false,
+            )
         assertEquals(expected, on(Stream.Stdout))
 
         jsSetEnv("CLICOLOR", "0")
@@ -61,24 +62,28 @@ class OnTest {
 
         jsSetEnv("CLICOLOR", "0")
         jsSetEnv("CLICOLOR_FORCE", "1")
-        val expected = ColorLevel(
-            level = 1,
-            hasBasic = true,
-            has256 = false,
-            has16m = false,
-        )
+        val expected =
+            ColorLevel(
+                level = 1,
+                hasBasic = true,
+                has256 = false,
+                has16m = false,
+            )
         assertEquals(expected, on(Stream.Stdout))
     }
 }
 
-private fun jsSetEnv(name: String, value: String): Unit = js(
-    "if (typeof process !== 'undefined' && process && process.env) { process.env[name] = value; }",
-)
+private fun jsSetEnv(name: String, value: String): Unit =
+    js(
+        "if (typeof process !== 'undefined' && process && process.env) { process.env[name] = value; }",
+    )
 
-private fun jsDeleteEnv(name: String): Unit = js(
-    "if (typeof process !== 'undefined' && process && process.env) { delete process.env[name]; }",
-)
+private fun jsDeleteEnv(name: String): Unit =
+    js(
+        "if (typeof process !== 'undefined' && process && process.env) { delete process.env[name]; }",
+    )
 
-private fun jsEnvKeys(): dynamic = js(
-    "(typeof process !== 'undefined' && process && process.env) ? Object.keys(process.env) : []",
-)
+private fun jsEnvKeys(): dynamic =
+    js(
+        "(typeof process !== 'undefined' && process && process.env) ? Object.keys(process.env) : []",
+    )

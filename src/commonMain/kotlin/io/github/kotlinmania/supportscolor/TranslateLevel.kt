@@ -1,8 +1,8 @@
 // port-lint: source lib.rs
 package io.github.kotlinmania.supportscolor
 
-internal fun translateLevel(level: Int): ColorLevel? {
-    return if (level == 0) {
+internal fun translateLevel(level: Int): ColorLevel? =
+    if (level == 0) {
         null
     } else {
         ColorLevel(
@@ -12,4 +12,3 @@ internal fun translateLevel(level: Int): ColorLevel? {
             has16m = level >= 3,
         )
     }
-}
