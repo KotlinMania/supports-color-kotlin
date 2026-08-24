@@ -30,3 +30,9 @@ package io.github.kotlinmania.supportscolor
  * Returns a [ColorLevel] if a [Stream] supports terminal colors.
  */
 fun on(stream: Stream): ColorLevel? = translateLevel(supportsColor(stream))
+
+internal fun on(
+    stream: Stream,
+    env: (String) -> String?,
+    isTty: (Stream) -> Boolean = { false },
+): ColorLevel? = translateLevel(supportsColor(stream, env, isTty))

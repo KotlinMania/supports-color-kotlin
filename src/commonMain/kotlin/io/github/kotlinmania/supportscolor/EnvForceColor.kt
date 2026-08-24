@@ -1,8 +1,8 @@
 // port-lint: source lib.rs
 package io.github.kotlinmania.supportscolor
 
-internal fun envForceColor(): Int {
-    val force = envVar("FORCE_COLOR")
+internal fun envForceColor(env: (String) -> String? = { envVar(it) }): Int {
+    val force = env("FORCE_COLOR")
     return if (force != null) {
         when (force) {
             "true", "" -> 1
@@ -10,7 +10,7 @@ internal fun envForceColor(): Int {
             else -> minOf(force.toIntOrNull() ?: 1, 3)
         }
     } else {
-        val cliClrForce = envVar("CLICOLOR_FORCE")
+        val cliClrForce = env("CLICOLOR_FORCE")
         if (cliClrForce != null) {
             if (cliClrForce != "0") {
                 1

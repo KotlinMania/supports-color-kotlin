@@ -14,6 +14,7 @@ import kotlin.test.assertNull
 private fun setUp() {
     // clears process env variable
     for (name in KNOWN_ENV) unsetenv(name)
+    resetCacheForTesting()
 }
 
 class OnTest {

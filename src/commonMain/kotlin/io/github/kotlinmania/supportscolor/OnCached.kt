@@ -2,11 +2,19 @@
 package io.github.kotlinmania.supportscolor
 
 // Compile-time assertion that the below indexing will never panic
-private val cache: Array<Lazy<ColorLevel?>> =
+private var cache: Array<Lazy<ColorLevel?>> =
     arrayOf(
         lazy { translateLevel(supportsColor(Stream.Stdout)) },
         lazy { translateLevel(supportsColor(Stream.Stderr)) },
     )
+
+internal fun resetCacheForTesting() {
+    cache =
+        arrayOf(
+            lazy { translateLevel(supportsColor(Stream.Stdout)) },
+            lazy { translateLevel(supportsColor(Stream.Stderr)) },
+        )
+}
 
 /**
  * Returns a [ColorLevel] if a [Stream] supports terminal colors, caching the result to
