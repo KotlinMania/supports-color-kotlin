@@ -2,9 +2,9 @@
 package io.github.kotlinmania.supportscolor
 
 internal object IsCi {
-    fun uncached(): Boolean {
+    fun uncached(env: (String) -> String? = { envVar(it) }): Boolean {
         for (name in CI_ENV_NAMES) {
-            val value = envVar(name)
+            val value = env(name)
             if (value != null && value.isNotEmpty()) return true
         }
         return false
