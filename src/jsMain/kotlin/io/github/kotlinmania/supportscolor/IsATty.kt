@@ -9,5 +9,5 @@ internal actual fun isATty(stream: Stream): Boolean =
 
 private fun jsIsTty(name: String): Boolean =
     js(
-        "(typeof process !== 'undefined' && process && process[name] && process[name].isTTY === true)",
+        "(() => { const g = typeof globalThis !== 'undefined' ? globalThis : (typeof window !== 'undefined' ? window : this); if (g.process && g.process[name] && g.process[name].isTTY === true) return true; if (typeof process !== 'undefined' && process && process[name] && process[name].isTTY === true) return true; return false; })()",
     )

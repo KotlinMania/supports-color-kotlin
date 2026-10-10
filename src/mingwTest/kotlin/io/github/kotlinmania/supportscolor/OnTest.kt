@@ -1,4 +1,4 @@
-// port-lint: source lib.rs
+// port-lint: tests lib.rs
 @file:OptIn(ExperimentalForeignApi::class)
 
 package io.github.kotlinmania.supportscolor

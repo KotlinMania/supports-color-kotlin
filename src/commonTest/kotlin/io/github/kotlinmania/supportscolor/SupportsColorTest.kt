@@ -1,4 +1,4 @@
-// port-lint: source lib.rs
+// port-lint: tests lib.rs
 package io.github.kotlinmania.supportscolor
 
 import kotlin.test.Test
@@ -23,12 +23,13 @@ class SupportsColorTest {
     @Test
     fun testClicolorAnsi() {
         val env1 = mapOf("IGNORE_IS_TERMINAL" to "1", "CLICOLOR" to "1")
-        val expected = ColorLevel(
-            level = 1,
-            hasBasic = true,
-            has256 = false,
-            has16m = false,
-        )
+        val expected =
+            ColorLevel(
+                level = 1,
+                hasBasic = true,
+                has256 = false,
+                has16m = false,
+            )
         val result1 = on(Stream.Stdout, env = { env1[it] }, isTty = { false })
         assertEquals(expected, result1)
 
@@ -49,12 +50,13 @@ class SupportsColorTest {
     @Test
     fun testClicolorForceAnsi() {
         val env = mapOf("CLICOLOR" to "0", "CLICOLOR_FORCE" to "1")
-        val expected = ColorLevel(
-            level = 1,
-            hasBasic = true,
-            has256 = false,
-            has16m = false,
-        )
+        val expected =
+            ColorLevel(
+                level = 1,
+                hasBasic = true,
+                has256 = false,
+                has16m = false,
+            )
         val result = on(Stream.Stdout, env = { env[it] }, isTty = { false })
         assertEquals(expected, result)
     }
