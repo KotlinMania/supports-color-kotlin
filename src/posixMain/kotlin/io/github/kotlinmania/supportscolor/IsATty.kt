@@ -8,7 +8,8 @@ import platform.posix.STDERR_FILENO
 import platform.posix.STDOUT_FILENO
 import platform.posix.isatty
 
-internal actual fun isATty(stream: Stream): Boolean = when (stream) {
-    Stream.Stdout -> isatty(STDOUT_FILENO) == 1
-    Stream.Stderr -> isatty(STDERR_FILENO) == 1
-}
+internal actual fun isATty(stream: Stream): Boolean =
+    when (stream) {
+        Stream.Stdout -> isatty(STDOUT_FILENO) == 1
+        Stream.Stderr -> isatty(STDERR_FILENO) == 1
+    }

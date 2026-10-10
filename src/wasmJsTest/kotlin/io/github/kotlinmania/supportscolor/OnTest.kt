@@ -1,4 +1,4 @@
-// port-lint: source lib.rs
+// port-lint: tests lib.rs
 @file:OptIn(kotlin.js.ExperimentalWasmJsInterop::class)
 
 package io.github.kotlinmania.supportscolor
@@ -9,7 +9,7 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 
 private fun setUp() {
-    // clears process env variable
+    resetCacheForTesting()
     val n = jsEnvCount()
     repeat(n) {
         val key = jsEnvKeyAt(0) ?: return
@@ -56,6 +56,7 @@ class OnTest {
         jsSetEnv("CLICOLOR", "0")
         assertNull(on(Stream.Stdout))
         assertNotNull(onCached(Stream.Stdout))
+        resetCacheForTesting()
     }
 
     @Test
@@ -76,19 +77,23 @@ class OnTest {
 }
 
 private fun jsSetEnv(name: String, value: String) {
-    js("if (typeof process !== 'undefined' && process && process.env) { process.env[name] = value; }")
+    js(
+        "(() => { const g = typeof globalThis !== 'undefined' ? globalThis : (typeof window !== 'undefined' ? window : this); if (!g.process) g.process = {}; if (!g.process.env) g.process.env = {}; g.process.env[name] = value; if (typeof process !== 'undefined' && process && process.env) process.env[name] = value; })()",
+    )
 }
 
 private fun jsDeleteEnv(name: String) {
-    js("if (typeof process !== 'undefined' && process && process.env) { delete process.env[name]; }")
+    js(
+        "(() => { const g = typeof globalThis !== 'undefined' ? globalThis : (typeof window !== 'undefined' ? window : this); if (g.process && g.process.env) delete g.process.env[name]; if (typeof process !== 'undefined' && process && process.env) delete process.env[name]; })()",
+    )
 }
 
 private fun jsEnvCount(): Int =
     js(
-        "(typeof process !== 'undefined' && process && process.env) ? Object.keys(process.env).length : 0",
+        "(() => { const g = typeof globalThis !== 'undefined' ? globalThis : (typeof window !== 'undefined' ? window : this); if (g.process && g.process.env) return Object.keys(g.process.env).length; if (typeof process !== 'undefined' && process && process.env) return Object.keys(process.env).length; return 0; })()",
     )
 
 private fun jsEnvKeyAt(index: Int): String? =
     js(
-        "(typeof process !== 'undefined' && process && process.env) ? Object.keys(process.env)[index] : null",
+        "(() => { const g = typeof globalThis !== 'undefined' ? globalThis : (typeof window !== 'undefined' ? window : this); const keys = (g.process && g.process.env) ? Object.keys(g.process.env) : ((typeof process !== 'undefined' && process && process.env) ? Object.keys(process.env) : []); return keys[index] || null; })()",
     )

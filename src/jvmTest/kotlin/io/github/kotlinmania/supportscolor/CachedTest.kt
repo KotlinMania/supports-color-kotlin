@@ -1,4 +1,4 @@
-// port-lint: source tests/cached.rs
+// port-lint: tests tests/cached.rs
 package io.github.kotlinmania.supportscolor
 
 import kotlin.concurrent.thread

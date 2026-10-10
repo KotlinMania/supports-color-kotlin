@@ -1,4 +1,4 @@
-// port-lint: source lib.rs
+// port-lint: tests lib.rs
 package io.github.kotlinmania.supportscolor
 
 import kotlin.test.Test
@@ -7,7 +7,7 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 
 private fun setUp() {
-    // clears process env variable
+    resetCacheForTesting()
     val keys = jsEnvKeys()
     val length = keys.length
     for (i in 0 until length) {
@@ -54,6 +54,7 @@ class OnTest {
         jsSetEnv("CLICOLOR", "0")
         assertNull(on(Stream.Stdout))
         assertNotNull(onCached(Stream.Stdout))
+        resetCacheForTesting()
     }
 
     @Test
@@ -75,15 +76,15 @@ class OnTest {
 
 private fun jsSetEnv(name: String, value: String): Unit =
     js(
-        "if (typeof process !== 'undefined' && process && process.env) { process.env[name] = value; }",
+        "(() => { const g = typeof globalThis !== 'undefined' ? globalThis : (typeof window !== 'undefined' ? window : this); if (!g.process) g.process = {}; if (!g.process.env) g.process.env = {}; g.process.env[name] = value; if (typeof process !== 'undefined' && process && process.env) process.env[name] = value; })()",
     )
 
 private fun jsDeleteEnv(name: String): Unit =
     js(
-        "if (typeof process !== 'undefined' && process && process.env) { delete process.env[name]; }",
+        "(() => { const g = typeof globalThis !== 'undefined' ? globalThis : (typeof window !== 'undefined' ? window : this); if (g.process && g.process.env) delete g.process.env[name]; if (typeof process !== 'undefined' && process && process.env) delete process.env[name]; })()",
     )
 
 private fun jsEnvKeys(): dynamic =
     js(
-        "(typeof process !== 'undefined' && process && process.env) ? Object.keys(process.env) : []",
+        "(() => { const g = typeof globalThis !== 'undefined' ? globalThis : (typeof window !== 'undefined' ? window : this); if (g.process && g.process.env) return Object.keys(g.process.env); if (typeof process !== 'undefined' && process && process.env) return Object.keys(process.env); return []; })()",
     )
