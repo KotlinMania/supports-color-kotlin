@@ -35,4 +35,5 @@ internal fun on(
     stream: Stream,
     env: (String) -> String?,
     isTty: (Stream) -> Boolean = { false },
-): ColorLevel? = translateLevel(supportsColor(stream, env, isTty))
+    ansiColor: (String?) -> Boolean = { checkAnsiColor(it) },
+): ColorLevel? = translateLevel(supportsColor(stream, env, isTty, ansiColor))

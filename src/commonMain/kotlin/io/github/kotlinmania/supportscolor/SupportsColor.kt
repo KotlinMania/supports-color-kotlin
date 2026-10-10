@@ -5,6 +5,7 @@ internal fun supportsColor(
     stream: Stream,
     env: (String) -> String? = { envVar(it) },
     isTty: (Stream) -> Boolean = { isATty(it) },
+    ansiColor: (String?) -> Boolean = { checkAnsiColor(it) },
 ): Int {
     val forceColor = envForceColor(env)
     return if (forceColor > 0) {
@@ -24,9 +25,9 @@ internal fun supportsColor(
     ) {
         2
     } else if (env("COLORTERM") != null ||
-        checkAnsiColor(env("TERM")) ||
+        ansiColor(env("TERM")) ||
         env("CLICOLOR")?.let { it != "0" } == true ||
-        IsCi.uncached()
+        IsCi.uncached(env)
     ) {
         1
     } else {

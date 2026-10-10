@@ -13,6 +13,7 @@ import kotlin.test.assertNull
 private fun setUp() {
     // clears process env variable
     for (name in KNOWN_ENV) _putenv_s(name, "")
+    resetCacheForTesting()
 }
 
 class OnTest {
@@ -27,6 +28,8 @@ class OnTest {
     fun testClicolorAnsi() {
         setUp()
 
+        // Windows assumes ANSI support when TERM is absent; cygwin isolates CLICOLOR.
+        _putenv_s("TERM", "cygwin")
         _putenv_s("IGNORE_IS_TERMINAL", "1")
         _putenv_s("CLICOLOR", "1")
         val expected =
@@ -45,6 +48,7 @@ class OnTest {
     @Test
     fun testOnCached() {
         setUp()
+        _putenv_s("TERM", "cygwin")
         _putenv_s("IGNORE_IS_TERMINAL", "1")
 
         _putenv_s("CLICOLOR", "1")
@@ -54,6 +58,17 @@ class OnTest {
         _putenv_s("CLICOLOR", "0")
         assertNull(on(Stream.Stdout))
         assertNotNull(onCached(Stream.Stdout))
+    }
+
+    @Test
+    fun testWindowsDefaultsToAnsiWithClicolorZero() {
+        setUp()
+        _putenv_s("IGNORE_IS_TERMINAL", "1")
+        _putenv_s("CLICOLOR", "0")
+        assertNotNull(on(Stream.Stdout))
+
+        _putenv_s("NO_COLOR", "1")
+        assertNull(on(Stream.Stdout))
     }
 
     @Test

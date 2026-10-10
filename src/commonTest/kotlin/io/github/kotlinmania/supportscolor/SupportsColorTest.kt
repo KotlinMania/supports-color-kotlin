@@ -30,12 +30,32 @@ class SupportsColorTest {
                 has256 = false,
                 has16m = false,
             )
-        val result1 = on(Stream.Stdout, env = { env1[it] }, isTty = { false })
+        // Isolate CLICOLOR from the platform's default ANSI support (true on Windows).
+        val result1 = on(Stream.Stdout, env = { env1[it] }, isTty = { false }, ansiColor = { false })
         assertEquals(expected, result1)
 
         val env2 = mapOf("IGNORE_IS_TERMINAL" to "1", "CLICOLOR" to "0")
-        val result2 = on(Stream.Stdout, env = { env2[it] }, isTty = { false })
+        val result2 = on(Stream.Stdout, env = { env2[it] }, isTty = { false }, ansiColor = { false })
         assertNull(result2)
+    }
+
+    @Test
+    fun testCiFallbackUsesProvidedEnvironment() {
+        val env = mapOf("IGNORE_IS_TERMINAL" to "1", "CI" to "true")
+        val result = on(Stream.Stdout, env = { env[it] }, ansiColor = { false })
+        assertNotNull(result)
+        assertEquals(1, result.level)
+
+        val withoutCi = mapOf("IGNORE_IS_TERMINAL" to "1", "CI" to "")
+        assertNull(on(Stream.Stdout, env = { withoutCi[it] }, ansiColor = { false }))
+    }
+
+    @Test
+    fun testAnsiSupportWithClicolorZero() {
+        val env = mapOf("IGNORE_IS_TERMINAL" to "1", "CLICOLOR" to "0")
+        val result = on(Stream.Stdout, env = { env[it] }, ansiColor = { true })
+        assertNotNull(result)
+        assertEquals(1, result.level)
     }
 
     @Test
