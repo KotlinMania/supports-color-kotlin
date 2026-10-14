@@ -32,7 +32,7 @@ internal inline fun <T, E> Result<T, E>.mapOr(default: Boolean, transform: (T) -
         is Err -> default
     }
 
-internal inline fun <T, E> Result<T, E>.unwrapOr(default: T): T =
+internal fun <T, E> Result<T, E>.unwrapOr(default: T): T =
     when (this) {
         is Ok -> inner
         is Err -> default
