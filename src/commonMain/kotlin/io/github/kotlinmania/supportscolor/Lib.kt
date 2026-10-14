@@ -138,7 +138,7 @@ private fun supportsColor(stream: Stream): Int {
     }
 }
 
-private fun checkAnsiColor(term: CharSequence?): Boolean =
+internal fun checkAnsiColor(term: CharSequence?): Boolean =
     if (term != null) {
         // cygwin doesn't seem to support ANSI escape sequences and instead has its own variety.
         term != "dumb" && term != "cygwin"
