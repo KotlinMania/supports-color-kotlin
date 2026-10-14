@@ -24,6 +24,7 @@ port_status_report.md
 high_priority_ports.md
 port_lint_proposed_changes.md
 NEXT_ACTIONS.md
+deep_symbol_inventory.txt
 ast_distance_*.txt
 .cache/
 *.lock

@@ -7,10 +7,10 @@ import kotlin.test.Test
 class CachedTest {
     @Test
     fun cachedMultithreaded() {
-        (0 until 12)
+        (0..<12)
             .map {
                 thread {
-                    repeat(1000) {
+                    for (i in 0..<1000) {
                         onCached(Stream.Stdout)
                     }
                 }
