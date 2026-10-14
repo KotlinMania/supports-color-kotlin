@@ -10,7 +10,7 @@ class CachedTest {
         (0..<12)
             .map {
                 thread {
-                    for (i in 0..<1000) {
+                    for (ignored in 0..<1000) {
                         onCached(Stream.Stdout)
                     }
                 }
