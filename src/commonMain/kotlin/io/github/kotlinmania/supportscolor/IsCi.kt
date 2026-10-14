@@ -1,10 +1,10 @@
 package io.github.kotlinmania.supportscolor
 
-import io.github.kotlinmania.libc.unix.STDERR_FILENO
-import io.github.kotlinmania.libc.unix.STDOUT_FILENO
-import io.github.kotlinmania.libc.unix.clearenv
+import io.github.kotlinmania.libc.new.common.posix.STDERR_FILENO
+import io.github.kotlinmania.libc.new.common.posix.STDOUT_FILENO
 import io.github.kotlinmania.libc.unix.getenv
 import io.github.kotlinmania.libc.unix.isatty
+import io.github.kotlinmania.libc.unix.linuxlike.clearenv
 import io.github.kotlinmania.libc.unix.setenv
 import io.github.kotlinmania.libc.unix.unsetenv
 import kotlin.concurrent.atomics.AtomicBoolean
