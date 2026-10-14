@@ -16,7 +16,6 @@
     "lint": true
   },
   "reexport_modules": [
-    "mod.rs",
-    "lib.rs"
+    "mod.rs"
   ]
 }
