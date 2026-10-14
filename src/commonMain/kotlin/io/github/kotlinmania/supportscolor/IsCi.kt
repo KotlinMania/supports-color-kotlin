@@ -63,7 +63,7 @@ internal fun String.parse(): Result<Int, Unit> {
     return if (parsed != null) Ok(parsed) else Err(Unit)
 }
 
-internal object env {
+internal object Env {
     fun `var`(key: String): Result<String, Unit> {
         val v = getenv(key)
         return if (v != null) Ok(v) else Err(Unit)
@@ -89,12 +89,14 @@ internal object env {
     }
 }
 
-internal object std {
-    object cmp {
+internal val env: Env = Env
+
+internal object Std {
+    object Cmp {
         fun min(a: Int, b: Int): Int = kotlin.math.min(a, b)
     }
 
-    object io {
+    object Io {
         class StdStream(private val fd: Int) {
             fun isTerminal(): Boolean = isatty(fd) != 0
         }
@@ -103,7 +105,12 @@ internal object std {
 
         fun stderr(): StdStream = StdStream(STDERR_FILENO)
     }
+
+    val cmp: Cmp = Cmp
+    val io: Io = Io
 }
+
+internal val std: Std = Std
 
 internal class OnceLock<T> {
     private class Box<T>(val value: T)
@@ -129,7 +136,7 @@ internal class OnceLock<T> {
     }
 }
 
-internal object isCi {
+internal object IsCi {
     private val INIT = AtomicBoolean(false)
     private val IS_CI = AtomicBoolean(false)
 
@@ -202,3 +209,5 @@ internal object isCi {
 
     private fun check(name: String): Boolean = env.`var`(name).isOk()
 }
+
+internal val isCi: IsCi = IsCi
