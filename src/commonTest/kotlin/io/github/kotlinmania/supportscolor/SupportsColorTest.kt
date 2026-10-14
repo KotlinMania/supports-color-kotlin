@@ -22,14 +22,14 @@ private fun setUp() {
 }
 
 internal fun testEmptyEnv() {
-    val testGuard = TEST_LOCK.lock().unwrap()
+    val ignored = TEST_LOCK.lock().unwrap()
     setUp()
 
     assertEq(on(Stream.Stdout), None)
 }
 
 internal fun testClicolorAnsi() {
-    val testGuard = TEST_LOCK.lock().unwrap()
+    val ignored = TEST_LOCK.lock().unwrap()
     setUp()
 
     env.setVar("IGNORE_IS_TERMINAL", "1")
@@ -50,7 +50,7 @@ internal fun testClicolorAnsi() {
 }
 
 internal fun testOnCached() {
-    val testGuard = TEST_LOCK.lock().unwrap()
+    val ignored = TEST_LOCK.lock().unwrap()
     setUp()
     env.setVar("IGNORE_IS_TERMINAL", "1")
 
@@ -64,7 +64,7 @@ internal fun testOnCached() {
 }
 
 internal fun testClicolorForceAnsi() {
-    val testGuard = TEST_LOCK.lock().unwrap()
+    val ignored = TEST_LOCK.lock().unwrap()
     setUp()
 
     env.setVar("CLICOLOR", "0")
@@ -90,7 +90,7 @@ class SupportsColorTest {
 
     @Test
     fun testEmptyEnv() {
-        val testGuard = TEST_LOCK.lock().unwrap()
+        val ignored = TEST_LOCK.lock().unwrap()
         setUp()
 
         assertEq(on(Stream.Stdout), None)
@@ -98,7 +98,7 @@ class SupportsColorTest {
 
     @Test
     fun testClicolorAnsi() {
-        val testGuard = TEST_LOCK.lock().unwrap()
+        val ignored = TEST_LOCK.lock().unwrap()
         setUp()
 
         env.setVar("IGNORE_IS_TERMINAL", "1")
@@ -120,7 +120,7 @@ class SupportsColorTest {
 
     @Test
     fun testOnCached() {
-        val testGuard = TEST_LOCK.lock().unwrap()
+        val ignored = TEST_LOCK.lock().unwrap()
         setUp()
         env.setVar("IGNORE_IS_TERMINAL", "1")
 
@@ -135,7 +135,7 @@ class SupportsColorTest {
 
     @Test
     fun testClicolorForceAnsi() {
-        val testGuard = TEST_LOCK.lock().unwrap()
+        val ignored = TEST_LOCK.lock().unwrap()
         setUp()
 
         env.setVar("CLICOLOR", "0")
