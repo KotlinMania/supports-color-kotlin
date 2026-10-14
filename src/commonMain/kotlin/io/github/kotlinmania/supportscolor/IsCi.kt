@@ -16,9 +16,13 @@ internal sealed interface Result<out T, out E> {
     fun ok(): T? = (this as? Ok)?.inner
 }
 
-internal data class Ok<out T>(val inner: T) : Result<T, Nothing>
+internal data class Ok<out T>(
+    val inner: T,
+) : Result<T, Nothing>
 
-internal data class Err<out E>(val e: E) : Result<Nothing, E>
+internal data class Err<out E>(
+    val e: E,
+) : Result<Nothing, E>
 
 internal inline fun <T, E, R> Result<T, E>.map(transform: (T) -> R): Result<R, E> =
     when (this) {
@@ -97,7 +101,9 @@ internal object Std {
     }
 
     object Io {
-        class StdStream(private val fd: Int) {
+        class StdStream(
+            private val fd: Int,
+        ) {
             fun isTerminal(): Boolean = isatty(fd) != 0
         }
 
@@ -113,7 +119,9 @@ internal object Std {
 internal val std: Std = Std
 
 internal class OnceLock<T> {
-    private class Box<T>(val value: T)
+    private class Box<T>(
+        val value: T,
+    )
 
     private val ref = AtomicReference<Box<T>?>(null)
 
