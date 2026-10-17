@@ -1,154 +1,72 @@
 // port-lint: tests lib.rs
 package io.github.kotlinmania.supportscolor
 
+import io.github.kotlinmania.libc.unix.linuxlike.clearenv
+import io.github.kotlinmania.libc.unix.setenv
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertTrue
-
-// needed to prevent race conditions when mutating the environment
-private val TEST_LOCK: TestMutex = TestMutex()
-
-private fun assertEq(actual: ColorLevel?, expected: ColorLevel?) {
-    assertEquals(expected, actual)
-}
-
-private fun assert(condition: Boolean) {
-    assertTrue(condition)
-}
-
-private fun setUp() {
-    // clears process env variable
-    env.vars().forEach { (k, _) -> env.removeVar(k) }
-}
-
-internal fun testEmptyEnv() {
-    val ignored = TEST_LOCK.lock().unwrap()
-    setUp()
-
-    assertEq(on(Stream.Stdout), None)
-}
-
-internal fun testClicolorAnsi() {
-    val ignored = TEST_LOCK.lock().unwrap()
-    setUp()
-
-    env.setVar("IGNORE_IS_TERMINAL", "1")
-    env.setVar("CLICOLOR", "1")
-    val expected =
-        Some(
-            ColorLevel(
-                1,
-                hasBasic = true,
-                has256 = false,
-                has16m = false,
-            ),
-        )
-    assertEq(on(Stream.Stdout), expected)
-
-    env.setVar("CLICOLOR", "0")
-    assertEq(on(Stream.Stdout), None)
-}
-
-internal fun testOnCached() {
-    val ignored = TEST_LOCK.lock().unwrap()
-    setUp()
-    env.setVar("IGNORE_IS_TERMINAL", "1")
-
-    env.setVar("CLICOLOR", "1")
-    assert(on(Stream.Stdout).isSome())
-    assert(onCached(Stream.Stdout).isSome())
-
-    env.setVar("CLICOLOR", "0")
-    assert(on(Stream.Stdout).isNone())
-    assert(onCached(Stream.Stdout).isSome())
-}
-
-internal fun testClicolorForceAnsi() {
-    val ignored = TEST_LOCK.lock().unwrap()
-    setUp()
-
-    env.setVar("CLICOLOR", "0")
-    env.setVar("CLICOLOR_FORCE", "1")
-    val expected =
-        Some(
-            ColorLevel(
-                1,
-                hasBasic = true,
-                has256 = false,
-                has16m = false,
-            ),
-        )
-    assertEq(on(Stream.Stdout), expected)
-}
+import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 
 class SupportsColorTest {
-    @Test
-    fun setUp() {
-        // clears process env variable
-        env.vars().forEach { (k, _) -> env.removeVar(k) }
+    private fun setUp() {
+        clearenv()
+        CACHE[0].reset()
+        CACHE[1].reset()
     }
 
     @Test
     fun testEmptyEnv() {
-        val ignored = TEST_LOCK.lock().unwrap()
         setUp()
-
-        assertEq(on(Stream.Stdout), None)
+        assertNull(on(Stream.Stdout))
     }
 
     @Test
     fun testClicolorAnsi() {
-        val ignored = TEST_LOCK.lock().unwrap()
         setUp()
 
-        env.setVar("IGNORE_IS_TERMINAL", "1")
-        env.setVar("CLICOLOR", "1")
+        setenv("IGNORE_IS_TERMINAL", "1", 1)
+        setenv("CLICOLOR", "1", 1)
         val expected =
-            Some(
-                ColorLevel(
-                    1,
-                    hasBasic = true,
-                    has256 = false,
-                    has16m = false,
-                ),
+            ColorLevel(
+                1,
+                hasBasic = true,
+                has256 = false,
+                has16m = false,
             )
-        assertEq(on(Stream.Stdout), expected)
+        assertEquals(expected, on(Stream.Stdout))
 
-        env.setVar("CLICOLOR", "0")
-        assertEq(on(Stream.Stdout), None)
+        setenv("CLICOLOR", "0", 1)
+        assertNull(on(Stream.Stdout))
     }
 
     @Test
     fun testOnCached() {
-        val ignored = TEST_LOCK.lock().unwrap()
         setUp()
-        env.setVar("IGNORE_IS_TERMINAL", "1")
+        setenv("IGNORE_IS_TERMINAL", "1", 1)
 
-        env.setVar("CLICOLOR", "1")
-        assert(on(Stream.Stdout).isSome())
-        assert(onCached(Stream.Stdout).isSome())
+        setenv("CLICOLOR", "1", 1)
+        assertNotNull(on(Stream.Stdout))
+        assertNotNull(onCached(Stream.Stdout))
 
-        env.setVar("CLICOLOR", "0")
-        assert(on(Stream.Stdout).isNone())
-        assert(onCached(Stream.Stdout).isSome())
+        setenv("CLICOLOR", "0", 1)
+        assertNull(on(Stream.Stdout))
+        assertNotNull(onCached(Stream.Stdout))
     }
 
     @Test
     fun testClicolorForceAnsi() {
-        val ignored = TEST_LOCK.lock().unwrap()
         setUp()
 
-        env.setVar("CLICOLOR", "0")
-        env.setVar("CLICOLOR_FORCE", "1")
+        setenv("CLICOLOR", "0", 1)
+        setenv("CLICOLOR_FORCE", "1", 1)
         val expected =
-            Some(
-                ColorLevel(
-                    1,
-                    hasBasic = true,
-                    has256 = false,
-                    has16m = false,
-                ),
+            ColorLevel(
+                1,
+                hasBasic = true,
+                has256 = false,
+                has16m = false,
             )
-        assertEq(on(Stream.Stdout), expected)
+        assertEquals(expected, on(Stream.Stdout))
     }
 }
