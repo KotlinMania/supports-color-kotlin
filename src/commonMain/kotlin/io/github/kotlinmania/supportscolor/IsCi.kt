@@ -1,148 +1,7 @@
 package io.github.kotlinmania.supportscolor
 
-import io.github.kotlinmania.libc.new.common.posix.STDERR_FILENO
-import io.github.kotlinmania.libc.new.common.posix.STDOUT_FILENO
 import io.github.kotlinmania.libc.unix.getenv
-import io.github.kotlinmania.libc.unix.isatty
-import io.github.kotlinmania.libc.unix.linuxlike.clearenv
-import io.github.kotlinmania.libc.unix.setenv
-import io.github.kotlinmania.libc.unix.unsetenv
 import kotlin.concurrent.atomics.AtomicBoolean
-import kotlin.concurrent.atomics.AtomicReference
-
-internal sealed interface Result<out T, out E> {
-    fun isOk(): Boolean = this is Ok
-
-    fun ok(): T? = (this as? Ok)?.inner
-}
-
-internal data class Ok<out T>(
-    val inner: T,
-) : Result<T, Nothing>
-
-internal data class Err<out E>(
-    val e: E,
-) : Result<Nothing, E>
-
-internal inline fun <T, E, R> Result<T, E>.map(transform: (T) -> R): Result<R, E> =
-    when (this) {
-        is Ok -> Ok(transform(inner))
-        is Err -> this
-    }
-
-internal inline fun <T, E> Result<T, E>.mapOr(default: Boolean, transform: (T) -> Boolean): Boolean =
-    when (this) {
-        is Ok -> transform(inner)
-        is Err -> default
-    }
-
-internal fun <T, E> Result<T, E>.unwrapOr(default: T): T =
-    when (this) {
-        is Ok -> inner
-        is Err -> default
-    }
-
-internal val None: ColorLevel? = null
-
-internal fun <T> Some(value: T): T = value
-
-internal fun <T : Any> T?.isSome(): Boolean = this != null
-
-internal fun <T : Any> T?.isNone(): Boolean = this == null
-
-internal class TestMutex {
-    class Guard {
-        fun unwrap(): Guard = this
-    }
-
-    fun lock(): Guard = Guard()
-}
-
-internal fun String.asRef(): String = this
-
-internal fun String?.asDeref(): String? = this
-
-internal fun String.parse(): Result<Int, Unit> {
-    val parsed = toIntOrNull()
-    return if (parsed != null) Ok(parsed) else Err(Unit)
-}
-
-internal object Env {
-    fun `var`(key: String): Result<String, Unit> {
-        val v = getenv(key)
-        return if (v != null) Ok(v) else Err(Unit)
-    }
-
-    fun setVar(key: String, value: String) {
-        setenv(key, value, 1)
-    }
-
-    fun removeVar(key: String) {
-        if (key.isEmpty()) {
-            clearenv()
-        } else {
-            unsetenv(key)
-        }
-    }
-
-    fun vars(): List<Pair<String, String>> {
-        clearenv()
-        CACHE[0].reset()
-        CACHE[1].reset()
-        return emptyList()
-    }
-}
-
-internal val env: Env = Env
-
-internal object Std {
-    object Cmp {
-        fun min(a: Int, b: Int): Int = kotlin.math.min(a, b)
-    }
-
-    object Io {
-        class StdStream(
-            private val fd: Int,
-        ) {
-            fun isTerminal(): Boolean = isatty(fd) != 0
-        }
-
-        fun stdout(): StdStream = StdStream(STDOUT_FILENO)
-
-        fun stderr(): StdStream = StdStream(STDERR_FILENO)
-    }
-
-    val cmp: Cmp = Cmp
-    val io: Io = Io
-}
-
-internal val std: Std = Std
-
-internal class OnceLock<T> {
-    private class Box<T>(
-        val value: T,
-    )
-
-    private val ref = AtomicReference<Box<T>?>(null)
-
-    fun getOrInit(init: () -> T): T {
-        val current = ref.load()
-        if (current != null) {
-            return current.value
-        }
-        val created = Box(init())
-        ref.compareAndSet(expectedValue = null, newValue = created)
-        return (ref.load() ?: created).value
-    }
-
-    fun reset() {
-        ref.store(null)
-    }
-
-    companion object {
-        fun <T> new(): OnceLock<T> = OnceLock()
-    }
-}
 
 internal object IsCi {
     private val INIT = AtomicBoolean(false)
@@ -173,16 +32,16 @@ internal object IsCi {
      * the environment changing, use [cached].
      */
     fun uncached(): Boolean {
-        val ciVar = env.`var`("CI")
-        return ciVar == Ok("true") ||
-            ciVar == Ok("1") ||
-            ciVar == Ok("woodpecker") ||
+        val ciVar = getenv("CI")
+        return ciVar == "true" ||
+            ciVar == "1" ||
+            ciVar == "woodpecker" ||
             check("CI_NAME") ||
             check("GITHUB_ACTION") ||
             check("GITLAB_CI") ||
             check("NETLIFY") ||
             check("TRAVIS") ||
-            env.`var`("NODE").ok()?.endsWith("//heroku/node/bin/node") == true ||
+            getenv("NODE")?.endsWith("//heroku/node/bin/node") == true ||
             check("CODEBUILD_SRC_DIR") ||
             check("BUILDER_OUTPUT") ||
             check("GITLAB_DEPLOYMENT") ||
@@ -215,7 +74,7 @@ internal object IsCi {
             check("SHIPPABLE")
     }
 
-    private fun check(name: String): Boolean = env.`var`(name).isOk()
+    private fun check(name: String): Boolean = getenv(name) != null
 }
 
 internal val isCi: IsCi = IsCi
